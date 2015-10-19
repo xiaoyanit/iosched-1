@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   Copyright 2014 Google Inc. All rights reserved.
 
@@ -15,13 +16,16 @@
   -->
 <resources>
 
+    <!-- standard metrics -->
+    <dimen name="spacing_normal">12dp</dimen>
+    <dimen name="spacing_micro">8dp</dimen>
+    <dimen name="padding_normal">24dp</dimen>
+
     <!-- UI elements -->
     <dimen name="detail_breadcrumb_height">48dp</dimen>
     <dimen name="action_button_min_width">64dp</dimen>
     <dimen name="add_to_schedule_button_height">72dp</dimen> <!-- including padding -->
     <dimen name="add_to_schedule_button_height_no_padding">56dp</dimen>
-
-    <dimen name="navdrawer_chosen_account_height">140dp</dimen>
 
     <dimen name="filter_spinner_width">200dp</dimen>
     <integer name="filter_spinner_weight">0</integer>
@@ -46,6 +50,9 @@
     <dimen name="livestream_session_title_text_size">22sp</dimen>
     <dimen name="livestream_session_summary_text_size">16sp</dimen>
 
+    <!-- my schedule -->
+    <dimen name="my_schedule_icon_horizontal_padding">28dp</dimen> <!-- center 24dp in @keyline_2 -->
+
     <dimen name="keyline_1">24dp</dimen>
     <dimen name="keyline_1_minus_8dp">16dp</dimen>
     <dimen name="keyline_2">80dp</dimen>
@@ -53,5 +60,15 @@
     <dimen name="keyline_2_session_detail">104dp</dimen>
 
     <dimen name="session_detail_speaker_left_offset">32dp</dimen> <!-- to center with FAB -->
+
+    <!-- feedback -->
+    <dimen name="feedback_rate_padding_top">20dp</dimen>
+
+
+    <!-- Welcome Activity -->
+    <dimen name="welcome_appbar_height">256dp</dimen> <!-- 4 * ?actionBarSize -->
+    <dimen name="welcome_content_padding_top">192dp</dimen> <!-- 3 * ?actionBarSize -->
+    <dimen name="welcome_content_padding">64dp</dimen>
+    <dimen name="welcome_title_size">24sp</dimen>
 
 </resources>

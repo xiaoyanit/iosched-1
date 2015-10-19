@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright 2014 Google Inc. All rights reserved.
+  Copyright 2015 Google Inc. All rights reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,14 +15,14 @@
   limitations under the License.
   -->
 <resources>
-
     <declare-styleable name="BaseTheme">
-        <attr name="actionBarOverlayTopOffset" format="dimension" />
+        <attr name="actionBarIconColor" format="color" />
         <attr name="actionBarInsetStart" format="dimension" />
         <attr name="spinnerBarInsetStart" format="dimension" />
-        <attr name="selectableItemBackgroundBorderless" format="dimension" />
-        <attr name="popupItemBackground" format="dimension" />
-        <attr name="photoItemForeground" format="dimension" />
+        <attr name="popupItemBackground" format="reference" />
+        <attr name="photoItemForeground" format="reference" />
+        <attr name="photoItemForegroundBorderless" format="reference" />
+        <attr name="imageItemBackground" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="MultiSwipeRefreshLayout">
@@ -31,6 +32,10 @@
     <declare-styleable name="DrawShadowFrameLayout">
         <attr name="shadowDrawable" format="reference" />
         <attr name="shadowVisible" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="ScrimInsetsView">
+        <attr name="appInsetForeground" format="reference|color" />
     </declare-styleable>
 
     <declare-styleable name="BezelImageView">
@@ -59,4 +64,19 @@
     <declare-styleable name="ThemeIOSched">
         <attr name="isFloatingWindow" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="AspectRatioView">
+        <attr name="aspectRatio" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="ForegroundView">
+        <attr name="android:foreground" />
+        <attr name="android:foregroundInsidePadding" />
+        <attr name="android:foregroundGravity" />
+    </declare-styleable>
+
+    <declare-styleable name="NavDrawerItemView">
+        <attr name="iconTints" format="color" />
+    </declare-styleable>
+
 </resources>

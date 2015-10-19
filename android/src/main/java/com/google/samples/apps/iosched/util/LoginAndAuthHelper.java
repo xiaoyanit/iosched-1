@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -39,11 +40,18 @@ import com.google.android.gms.plus.People;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.google.android.gms.plus.model.people.PersonBuffer;
+import com.google.samples.apps.iosched.settings.SettingsUtils;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static com.google.samples.apps.iosched.util.LogUtils.*;
+import static com.google.samples.apps.iosched.util.LogUtils.LOGD;
+import static com.google.samples.apps.iosched.util.LogUtils.LOGE;
+import static com.google.samples.apps.iosched.util.LogUtils.LOGW;
+import static com.google.samples.apps.iosched.util.LogUtils.makeLogTag;
 
 /**
  * This helper handles the UI flow for signing in and authenticating an account. It handles
@@ -61,21 +69,22 @@ public class LoginAndAuthHelper implements GoogleApiClient.ConnectionCallbacks, 
     private static final int REQUEST_PLAY_SERVICES_ERROR_DIALOG = 103;
 
     // Auth scopes we need
-    public static final String AUTH_SCOPES[] = {
+    private static final List<String> AUTH_SCOPES = new ArrayList<>(Arrays.asList(
             Scopes.PLUS_LOGIN,
             Scopes.DRIVE_APPFOLDER,
-            "https://www.googleapis.com/auth/plus.profile.emails.read"};
+            "https://www.googleapis.com/auth/plus.profile.emails.read"));
 
-    static final String AUTH_TOKEN_TYPE;
+    public static final String AUTH_TOKEN_TYPE;
 
     static {
+        // Initialize oauth scope
         StringBuilder sb = new StringBuilder();
         sb.append("oauth2:");
         for (String scope : AUTH_SCOPES) {
             sb.append(scope);
             sb.append(" ");
         }
-        AUTH_TOKEN_TYPE = sb.toString();
+        AUTH_TOKEN_TYPE = sb.toString().trim();
     }
 
     private static final String TAG = makeLogTag(LoginAndAuthHelper.class);
@@ -122,7 +131,7 @@ public class LoginAndAuthHelper implements GoogleApiClient.ConnectionCallbacks, 
         mCallbacksRef = new WeakReference<Callbacks>(callbacks);
         mAppContext = activity.getApplicationContext();
         mAccountName = accountName;
-        if (PrefUtils.hasUserRefusedSignIn(activity)) {
+        if (SettingsUtils.hasUserRefusedSignIn(activity)) {
             // If we know the user refused sign-in, let's not annoy them.
             sCanShowSignInUi = sCanShowAuthUi = false;
         }
@@ -148,11 +157,11 @@ public class LoginAndAuthHelper implements GoogleApiClient.ConnectionCallbacks, 
         LOGD(TAG, "Retrying sign-in/auth (user-initiated).");
         if (!mGoogleApiClient.isConnected()) {
             sCanShowAuthUi = sCanShowSignInUi = true;
-            PrefUtils.markUserRefusedSignIn(mAppContext, false);
+            SettingsUtils.markUserRefusedSignIn(mAppContext, false);
             mGoogleApiClient.connect();
         } else if (!AccountUtils.hasToken(mAppContext, mAccountName)) {
             sCanShowAuthUi = sCanShowSignInUi = true;
-            PrefUtils.markUserRefusedSignIn(mAppContext, false);
+            SettingsUtils.markUserRefusedSignIn(mAppContext, false);
             mTokenTask = new GetTokenTask();
             mTokenTask.execute();
         } else {
@@ -303,8 +312,13 @@ public class LoginAndAuthHelper implements GoogleApiClient.ConnectionCallbacks, 
                 // Record profile ID, image URL and name
                 LOGD(TAG, "Saving plus profile ID: " + currentUser.getId());
                 AccountUtils.setPlusProfileId(mAppContext, mAccountName, currentUser.getId());
-                LOGD(TAG, "Saving plus image URL: " + currentUser.getImage().getUrl());
-                AccountUtils.setPlusImageUrl(mAppContext, mAccountName, currentUser.getImage().getUrl());
+                String imageUrl = currentUser.getImage().getUrl();
+                if (imageUrl != null) {
+                    imageUrl = Uri.parse(imageUrl)
+                            .buildUpon().appendQueryParameter("sz", "256").build().toString();
+                }
+                LOGD(TAG, "Saving plus image URL: " + imageUrl);
+                AccountUtils.setPlusImageUrl(mAppContext, mAccountName, imageUrl);
                 LOGD(TAG, "Saving plus display name: " + currentUser.getDisplayName());
                 AccountUtils.setPlusName(mAppContext, mAccountName, currentUser.getDisplayName());
                 Person.Cover cover = currentUser.getCover();
@@ -355,8 +369,8 @@ public class LoginAndAuthHelper implements GoogleApiClient.ConnectionCallbacks, 
                 }
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 LOGD(TAG, "User explicitly cancelled sign-in/auth flow.");
-                // save this as a preference so we don't annoy the user again
-                PrefUtils.markUserRefusedSignIn(mAppContext);
+                // Save the refusal so the user isn't annoyed again.
+                SettingsUtils.markUserRefusedSignIn(mAppContext, true);
             } else {
                 LOGW(TAG, "Failed to recover from a login/auth failure, resultCode=" + resultCode);
             }
@@ -428,7 +442,8 @@ public class LoginAndAuthHelper implements GoogleApiClient.ConnectionCallbacks, 
                 }
 
                 LOGD(TAG, "Starting background auth for " + mAccountName);
-                final String token = GoogleAuthUtil.getToken(mAppContext, mAccountName, AUTH_TOKEN_TYPE);
+                final String token = GoogleAuthUtil
+                        .getToken(mAppContext, mAccountName, AUTH_TOKEN_TYPE);
 
                 // Save auth token.
                 LOGD(TAG, "Saving token: " + (token == null ? "(null)" : "(length " +
